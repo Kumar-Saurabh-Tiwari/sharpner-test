@@ -1,0 +1,25 @@
+.rating-row {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(3rem, 1fr) 1.5rem;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: .5rem;
+}
+
+.rating-stars,
+.feedback-item-rating {
+  color: #b7791f;
+  white-space: nowrap;
+}
+
+.rating-track {
+  height: .45rem;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: #e9ecef;
+}
+
+.rating-fill {
+  height: 100%;
+  background: #0d6efd;
+}
