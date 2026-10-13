@@ -15,57 +15,36 @@
         <p class="text-secondary mb-0">Share your experience and help us improve.</p>
       </header>
 
-      <section class="card mb-3" aria-labelledby="ratings-title">
+      <div class="card">
         <div class="card-body">
-          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <h2 id="ratings-title" class="h5 mb-0">Overall ratings</h2>
-            <p id="rating-summary" class="text-secondary mb-0">Loading ratings…</p>
-          </div>
-          <div id="rating-breakdown" class="rating-breakdown mt-3" aria-live="polite"></div>
+          <h2 class="h5 mb-3">Leave feedback</h2>
+          <form id="feedback-form">
+            <label for="feedback-name" class="form-label">Your name</label>
+            <input id="feedback-name" class="form-control" name="name" type="text" maxlength="80" autocomplete="name" required>
+
+            <label for="feedback-rating" class="form-label mt-3">Rating</label>
+            <select id="feedback-rating" class="form-select" name="rating" required>
+              <option value="5">5 — Excellent</option>
+              <option value="4">4 — Great</option>
+              <option value="3">3 — Good</option>
+              <option value="2">2 — Could be better</option>
+              <option value="1">1 — Not great</option>
+            </select>
+
+            <div class="d-flex gap-2 mt-3">
+              <button id="submit-button" class="btn btn-primary" type="submit">Submit</button>
+              <button id="cancel-edit" class="btn btn-outline-secondary" type="button" hidden>Cancel</button>
+            </div>
+          </form>
         </div>
-      </section>
+      </div>
 
-      <section class="row g-3 align-items-start">
-        <section class="col-12 col-lg-4" aria-labelledby="form-title">
-          <div class="card">
-            <div class="card-body">
-              <h2 id="form-title" class="h5 mb-3">Leave feedback</h2>
-              <form id="feedback-form">
-                <label for="feedback-name" class="form-label">Your name</label>
-                <input id="feedback-name" class="form-control" name="name" type="text" maxlength="80" autocomplete="name" required>
-
-                <label for="feedback-rating" class="form-label mt-3">Rating</label>
-                <select id="feedback-rating" class="form-select" name="rating" required>
-                  <option value="5">5 — Excellent</option>
-                  <option value="4">4 — Great</option>
-                  <option value="3">3 — Good</option>
-                  <option value="2">2 — Could be better</option>
-                  <option value="1">1 — Not great</option>
-                </select>
-
-                <div class="d-flex gap-2 mt-3">
-                  <button id="submit-button" class="btn btn-primary" type="submit">Submit</button>
-                  <button id="cancel-edit" class="btn btn-outline-secondary" type="button" hidden>Cancel</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </section>
-
-        <section class="col-12 col-lg-8" aria-labelledby="feedback-title">
-          <div class="card">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h2 id="feedback-title" class="h5 mb-0">All feedback</h2>
-                <span id="feedback-count" class="badge text-bg-secondary">0</span>
-              </div>
-              <div id="feedback-list" class="list-group list-group-flush" aria-live="polite">
-                <p class="text-secondary mb-0 py-3">Loading feedback…</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </section>
+      <div class="card mt-4">
+        <div class="card-body">
+          <h2 class="h5 mb-3">All feedback</h2>
+          <div id="feedback-list" class="list-group list-group-flush" aria-live="polite"></div>
+        </div>
+      </div>
 
       <p id="status-message" class="mt-3 small" role="status" aria-live="polite"></p>
     </main>
