@@ -1,4 +1,4 @@
-const STORAGE_KEY = "simple-feedback";
+const apiUrl = "https://crudcrud.com/api/720fcf35ae7441dbb335eb2449e8ae99/feedback";
 const ratings = [1, 2, 3, 4, 5];
 
 const form = document.querySelector("#feedback-form");
@@ -9,25 +9,12 @@ const nameInput = document.querySelector("#feedback-name");
 const ratingInput = document.querySelector("#feedback-rating");
 const cancelButton = document.querySelector("#cancel-edit");
 
-let feedback = loadFeedback();
+let feedback = [];
 let editingId = null;
 
 function showStatus(message, isError = false) {
   statusBox.textContent = message;
   statusBox.dataset.error = String(isError);
-}
-
-function loadFeedback() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveFeedback() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(feedback));
 }
 
 function stars(rating) {
@@ -41,6 +28,22 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/\"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+async function request(url, method = "GET", data) {
+  const response = await fetch(url, {
+    method,
+    headers: data ? { "Content-Type": "application/json" } : {},
+    body: data ? JSON.stringify(data) : undefined,
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Request failed (${response.status}): ${text || "Bad request"}`);
+  }
+
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
 }
 
 function render() {
@@ -76,7 +79,17 @@ function resetForm() {
   cancelButton.hidden = true;
 }
 
-list.addEventListener("click", (event) => {
+async function loadFeedback() {
+  try {
+    const records = await request(apiUrl);
+    feedback = Array.isArray(records) ? records : [];
+    render();
+  } catch (error) {
+    showStatus(`Could not load feedback: ${error.message}`, true);
+  }
+}
+
+list.addEventListener("click", async (event) => {
   const button = event.target.closest("button[data-action]");
   if (!button) return;
 
@@ -84,7 +97,7 @@ list.addEventListener("click", (event) => {
   if (!item) return;
 
   if (button.dataset.action === "edit") {
-    editingId = item.id;
+    editingId = item._id;
     nameInput.value = item.name || "";
     ratingInput.value = String(item.rating || 5);
     submitButton.textContent = "Save";
@@ -98,46 +111,56 @@ list.addEventListener("click", (event) => {
       return;
     }
 
-    feedback = feedback.filter((record) => record.id !== item.id);
-    saveFeedback();
-    render();
+    try {
+      await request(`${apiUrl}/${encodeURIComponent(item._id)}`, "DELETE");
+      feedback = feedback.filter((record) => record._id !== item._id);
 
-    if (editingId === item.id) {
-      resetForm();
+      if (editingId === item._id) {
+        resetForm();
+      }
+
+      render();
+      showStatus("Feedback deleted.");
+    } catch (error) {
+      showStatus(`Could not delete feedback: ${error.message}`, true);
     }
-
-    showStatus("Feedback deleted.");
   }
 });
 
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const name = String(new FormData(form).get("name") || "").trim();
-  const rating = Number(new FormData(form).get("rating"));
+  const formData = new FormData(form);
+  const name = String(formData.get("name") || "").trim();
+  const rating = Number(formData.get("rating"));
 
   if (!name || !ratings.includes(rating)) {
     showStatus("Please enter your name and choose a rating.", true);
     return;
   }
 
-  if (editingId) {
-    feedback = feedback.map((item) => item.id === editingId ? { ...item, name, rating } : item);
-    showStatus("Feedback updated.");
-  } else {
-    feedback.unshift({
-      id: Date.now().toString(),
-      name,
-      rating,
-    });
-    showStatus("Thanks for your feedback!");
-  }
+  try {
+    if (editingId) {
+      await request(`${apiUrl}/${encodeURIComponent(editingId)}`, "PUT", { name, rating });
+      feedback = feedback.map((item) => item._id === editingId ? { ...item, name, rating } : item);
+      showStatus("Feedback updated.");
+    } else {
+      const created = await request(apiUrl, "POST", { name, rating });
+      if (!created || !created._id) {
+        throw new Error("CRUDCrud did not return a valid ID.");
+      }
 
-  saveFeedback();
-  resetForm();
-  render();
+      feedback.unshift(created);
+      showStatus("Thanks for your feedback!");
+    }
+
+    resetForm();
+    render();
+  } catch (error) {
+    showStatus(`Could not save feedback: ${error.message}`, true);
+  }
 });
 
 cancelButton.addEventListener("click", resetForm);
 
-render();
+loadFeedback();
