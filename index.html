@@ -20,7 +20,10 @@
           <h2 class="h5 mb-3">Leave feedback</h2>
           <form id="feedback-form">
             <label for="feedback-name" class="form-label">Your name</label>
-            <input id="feedback-name" class="form-control" name="name" type="text" maxlength="80" autocomplete="name" required>
+            <input id="feedback-name" class="form-control" name="name" type="text" maxlength="80" autocomplete="name">
+
+            <label for="feedback-description" class="form-label mt-3">Description</label>
+            <textarea id="feedback-description" class="form-control p-3" name="description" rows="3" maxlength="500"></textarea>
 
             <label for="feedback-rating" class="form-label mt-3">Rating</label>
             <select id="feedback-rating" class="form-select" name="rating" required>

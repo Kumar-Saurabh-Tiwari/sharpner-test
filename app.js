@@ -1,4 +1,4 @@
-const apiUrl = "https://crudcrud.com/api/720fcf35ae7441dbb335eb2449e8ae99/feedback";
+const apiUrl = "https://crudcrud.com/api/770da0047e5c43a1ad715d3f878f44eb/feedback";
 const ratings = [1, 2, 3, 4, 5];
 
 const form = document.querySelector("#feedback-form");
@@ -6,6 +6,7 @@ const list = document.querySelector("#feedback-list");
 const statusBox = document.querySelector("#status-message");
 const submitButton = document.querySelector("#submit-button");
 const nameInput = document.querySelector("#feedback-name");
+const descriptionInput = document.querySelector("#feedback-description");
 const ratingInput = document.querySelector("#feedback-rating");
 const cancelButton = document.querySelector("#cancel-edit");
 
@@ -54,12 +55,14 @@ function render() {
 
   list.innerHTML = feedback.map((item, index) => {
     const name = escapeHtml(item.name || "Anonymous");
+    const description = escapeHtml(item.description || "");
     const rating = Number(item.rating);
 
     return `
       <article class="list-group-item d-flex justify-content-between align-items-center gap-3">
         <div class="min-w-0">
           <p class="mb-1 fw-semibold text-break">${name}</p>
+          ${description ? `<p class="mb-1 text-break">${description}</p>` : ""}
           <span class="feedback-item-rating">${ratings.includes(rating) ? stars(rating) : "No rating"}</span>
         </div>
         <div class="d-flex gap-2 flex-shrink-0">
@@ -99,6 +102,7 @@ list.addEventListener("click", async (event) => {
   if (button.dataset.action === "edit") {
     editingId = item._id;
     nameInput.value = item.name || "";
+    descriptionInput.value = item.description || "";
     ratingInput.value = String(item.rating || 5);
     submitButton.textContent = "Save";
     cancelButton.hidden = false;
@@ -129,11 +133,10 @@ list.addEventListener("click", async (event) => {
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-
   const formData = new FormData(form);
   const name = String(formData.get("name") || "").trim();
+  const description = String(formData.get("description") || "").trim();
   const rating = Number(formData.get("rating"));
-
   if (!name || !ratings.includes(rating)) {
     showStatus("Please enter your name and choose a rating.", true);
     return;
@@ -141,11 +144,11 @@ form.addEventListener("submit", async (event) => {
 
   try {
     if (editingId) {
-      await request(`${apiUrl}/${encodeURIComponent(editingId)}`, "PUT", { name, rating });
-      feedback = feedback.map((item) => item._id === editingId ? { ...item, name, rating } : item);
+      await request(`${apiUrl}/${encodeURIComponent(editingId)}`, "PUT", { name, description, rating });
+      feedback = feedback.map((item) => item._id === editingId ? { ...item, name, description, rating } : item);
       showStatus("Feedback updated.");
     } else {
-      const created = await request(apiUrl, "POST", { name, rating });
+      const created = await request(apiUrl, "POST", { name, description, rating });
       if (!created || !created._id) {
         throw new Error("CRUDCrud did not return a valid ID.");
       }
